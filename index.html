@@ -1,8 +1,2143 @@
 <!DOCTYPE html>
-<html>
-<head><title>New Project</title></head>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShellType — Master DevOps Commands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c10;
+  --bg2: #0d1117;
+  --bg3: #111820;
+  --panel: #0f1923;
+  --border: #1a2535;
+  --green: #00ff9f;
+  --green-dim: #00cc7a;
+  --green-glow: rgba(0,255,159,0.15);
+  --cyan: #00d4ff;
+  --cyan-dim: #0099bb;
+  --red: #ff3860;
+  --red-dim: #cc2244;
+  --yellow: #ffd700;
+  --orange: #ff6b35;
+  --text: #c8d8e8;
+  --text-dim: #4a6070;
+  --text-muted: #2a3a4a;
+  --correct: #00ff9f;
+  --wrong: #ff3860;
+  --cursor: #00ff9f;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Orbitron', sans-serif;
+  --font-terminal: 'Share Tech Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* CRT Scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 2px; }
+
+/* ==================== HEADER ==================== */
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: var(--green);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  color: var(--bg);
+  font-weight: 900;
+  font-family: var(--font-terminal);
+  box-shadow: 0 0 16px var(--green);
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--green);
+  text-shadow: 0 0 20px var(--green);
+  letter-spacing: 2px;
+}
+
+.logo-sub {
+  font-family: var(--font-terminal);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Top Speed Banner */
+#top-speed-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(90deg, rgba(0,255,159,0.05), rgba(0,212,255,0.05));
+  border: 1px solid rgba(0,255,159,0.2);
+  border-radius: 8px;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+#top-speed-banner:hover {
+  border-color: var(--green);
+  background: linear-gradient(90deg, rgba(0,255,159,0.12), rgba(0,212,255,0.08));
+  box-shadow: 0 0 20px rgba(0,255,159,0.1);
+}
+
+.banner-label {
+  font-family: var(--font-terminal);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.banner-speed {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--green);
+  text-shadow: 0 0 10px var(--green);
+}
+
+.banner-user {
+  font-family: var(--font-terminal);
+  font-size: 12px;
+  color: var(--cyan);
+}
+
+.banner-crown { font-size: 16px; }
+.banner-arrow {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+
+/* Nav */
+.nav-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-family: var(--font-terminal);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.nav-btn:hover, .nav-btn.active {
+  border-color: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 8px rgba(0,255,159,0.2);
+}
+
+/* ==================== LEADERBOARD MODAL ==================== */
+#leaderboard-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+#leaderboard-modal.open { display: flex; }
+
+.modal-box {
+  background: var(--bg2);
+  border: 1px solid var(--green);
+  border-radius: 12px;
+  width: 560px;
+  max-width: 95vw;
+  box-shadow: 0 0 60px rgba(0,255,159,0.15);
+  overflow: hidden;
+  animation: modalIn 0.3s ease;
+}
+
+@keyframes modalIn {
+  from { transform: scale(0.9) translateY(-20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  background: linear-gradient(90deg, rgba(0,255,159,0.08), transparent);
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 2px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+
+.modal-close:hover { color: var(--red); }
+
+.leaderboard-list {
+  padding: 16px 24px;
+}
+
+.lb-entry {
+  display: grid;
+  grid-template-columns: 36px 1fr 80px 60px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  animation: fadeRow 0.4s ease both;
+}
+
+@keyframes fadeRow {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.lb-entry:last-child { border-bottom: none; }
+
+.lb-rank {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.lb-rank.r1 { color: var(--yellow); text-shadow: 0 0 8px var(--yellow); }
+.lb-rank.r2 { color: #c0c0c0; }
+.lb-rank.r3 { color: #cd7f32; }
+.lb-rank.rn { color: var(--text-dim); }
+
+.lb-name {
+  font-family: var(--font-terminal);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.lb-category {
+  font-family: var(--font-terminal);
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.lb-wpm {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--green);
+  text-shadow: 0 0 8px var(--green);
+  text-align: right;
+}
+
+.lb-wpm-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.lb-acc {
+  font-family: var(--font-terminal);
+  font-size: 12px;
+  color: var(--cyan);
+  text-align: right;
+}
+
+/* ==================== MAIN ==================== */
+#main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* ==================== SCREENS ==================== */
+.screen { display: none; }
+.screen.active { display: block; animation: screenIn 0.4s ease; }
+
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==================== MENU SCREEN ==================== */
+.menu-hero {
+  text-align: center;
+  margin-bottom: 48px;
+  padding-top: 20px;
+}
+
+.menu-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 900;
+  color: var(--green);
+  text-shadow: 0 0 40px var(--green), 0 0 80px rgba(0,255,159,0.3);
+  letter-spacing: 4px;
+  line-height: 1.1;
+}
+
+.menu-hero p {
+  font-family: var(--font-terminal);
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-top: 12px;
+  letter-spacing: 2px;
+}
+
+.menu-hero-prompt {
+  font-family: var(--font-terminal);
+  font-size: 13px;
+  color: var(--green-dim);
+  margin-top: 8px;
+}
+
+.menu-hero-prompt span {
+  color: var(--text-dim);
+}
+
+/* Category Grid */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.cat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.cat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--cat-color, var(--green));
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.cat-card:hover {
+  border-color: var(--cat-color, var(--green));
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 24px rgba(0,255,159,0.08);
+}
+
+.cat-card:hover::before { opacity: 1; }
+
+.cat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cat-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.cat-badge {
+  font-family: var(--font-terminal);
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(0,255,159,0.08);
+  color: var(--green-dim);
+  border: 1px solid rgba(0,255,159,0.2);
+}
+
+.cat-name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.cat-desc {
+  font-family: var(--font-terminal);
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.cat-levels {
+  display: flex;
+  gap: 8px;
+}
+
+.level-btn {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  font-family: var(--font-terminal);
+  font-size: 10px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.level-btn.basic { --lc: var(--green); }
+.level-btn.intermediate { --lc: var(--cyan); }
+.level-btn.advanced { --lc: var(--orange); }
+
+.level-btn:hover {
+  border-color: var(--lc);
+  color: var(--lc);
+  background: rgba(0,0,0,0.3);
+  box-shadow: 0 0 8px rgba(0,255,159,0.1);
+}
+
+.cat-stats {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.cat-stat {
+  font-family: var(--font-terminal);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.cat-stat span {
+  color: var(--cyan);
+}
+
+/* ==================== TYPING SCREEN ==================== */
+.typing-layout {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Terminal Panel */
+.terminal-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.terminal-titlebar {
+  background: var(--bg3);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.term-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.term-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+
+.term-dot.red { background: #ff5f57; }
+.term-dot.yellow { background: #ffbd2e; }
+.term-dot.green { background: #28ca41; }
+
+.term-title {
+  font-family: var(--font-terminal);
+  font-size: 12px;
+  color: var(--text-dim);
+  flex: 1;
+  text-align: center;
+}
+
+.term-mode-badge {
+  font-family: var(--font-terminal);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 1px;
+}
+
+.term-mode-badge.basic { background: rgba(0,255,159,0.1); color: var(--green); border: 1px solid rgba(0,255,159,0.3); }
+.term-mode-badge.intermediate { background: rgba(0,212,255,0.1); color: var(--cyan); border: 1px solid rgba(0,212,255,0.3); }
+.term-mode-badge.advanced { background: rgba(255,107,53,0.1); color: var(--orange); border: 1px solid rgba(255,107,53,0.3); }
+
+/* Progress bar */
+.progress-track {
+  height: 2px;
+  background: var(--bg3);
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  box-shadow: 0 0 8px var(--green);
+  transition: width 0.3s ease;
+}
+
+/* Command display area */
+.cmd-area {
+  padding: 28px 24px;
+  min-height: 200px;
+}
+
+.cmd-annotation {
+  font-family: var(--font-terminal);
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  border-left: 2px solid var(--border);
+  line-height: 1.5;
+}
+
+.cmd-annotation .comment-hash { color: var(--green-dim); }
+
+.cmd-prompt-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.cmd-prompt-prefix {
+  font-family: var(--font-terminal);
+  font-size: 16px;
+  white-space: nowrap;
+  margin-right: 8px;
+  user-select: none;
+}
+
+.cmd-prompt-prefix .p-user { color: var(--green); }
+.cmd-prompt-prefix .p-at { color: var(--text-dim); }
+.cmd-prompt-prefix .p-host { color: var(--cyan); }
+.cmd-prompt-prefix .p-path { color: var(--text-dim); }
+.cmd-prompt-prefix .p-dollar { color: var(--yellow); margin-left: 2px; }
+
+.cmd-text-display {
+  font-family: var(--font-terminal);
+  font-size: 16px;
+  line-height: 1.8;
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
+  position: relative;
+}
+
+.cmd-char {
+  position: relative;
+  display: inline;
+}
+
+.cmd-char.correct { color: var(--correct); }
+.cmd-char.wrong { color: var(--wrong); background: rgba(255,56,96,0.15); border-radius: 2px; }
+.cmd-char.pending { color: var(--text-muted); }
+.cmd-char.cursor-pos::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: var(--cursor);
+  box-shadow: 0 0 6px var(--cursor);
+  vertical-align: text-bottom;
+  margin-left: 1px;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Input (hidden) */
+#typing-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+}
+
+/* Upcoming commands */
+.upcoming-section {
+  padding: 0 24px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.upcoming-label {
+  font-family: var(--font-terminal);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  padding: 12px 0 8px;
+  text-transform: uppercase;
+}
+
+.upcoming-cmd {
+  font-family: var(--font-terminal);
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upcoming-cmd:first-of-type { color: var(--text-dim); }
+
+/* ==================== STATS SIDEBAR ==================== */
+.stats-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.stat-card-label {
+  font-family: var(--font-terminal);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.stat-card-value {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-card-value.wpm-val { color: var(--green); text-shadow: 0 0 16px var(--green); }
+.stat-card-value.acc-val { color: var(--cyan); text-shadow: 0 0 16px var(--cyan); }
+.stat-card-value.time-val { color: var(--yellow); text-shadow: 0 0 16px var(--yellow); }
+
+.stat-card-unit {
+  font-family: var(--font-terminal);
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* Progress counters */
+.progress-counters {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-terminal);
+  font-size: 11px;
+}
+
+.progress-row:last-child { border-bottom: none; }
+
+.progress-row-label { color: var(--text-dim); }
+.progress-row-val { color: var(--text); }
+.progress-row-val.good { color: var(--green); }
+.progress-row-val.bad { color: var(--red); }
+
+/* Controls */
+.controls-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.ctrl-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text-dim);
+  font-family: var(--font-terminal);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.ctrl-btn:last-child { margin-bottom: 0; }
+.ctrl-btn:hover { border-color: var(--green-dim); color: var(--green); }
+.ctrl-btn .kbd { color: var(--text-muted); font-size: 10px; }
+
+/* ==================== RESULTS SCREEN ==================== */
+.results-layout {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.results-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.results-grade {
+  font-family: var(--font-display);
+  font-size: 80px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.grade-S { color: var(--yellow); text-shadow: 0 0 40px var(--yellow); }
+.grade-A { color: var(--green); text-shadow: 0 0 30px var(--green); }
+.grade-B { color: var(--cyan); text-shadow: 0 0 25px var(--cyan); }
+.grade-C { color: var(--orange); text-shadow: 0 0 20px var(--orange); }
+.grade-D { color: var(--red); text-shadow: 0 0 15px var(--red); }
+
+.results-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.results-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.result-stat-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.rsb-label {
+  font-family: var(--font-terminal);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.rsb-value {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.rsb-value.v-wpm { color: var(--green); text-shadow: 0 0 16px var(--green); }
+.rsb-value.v-acc { color: var(--cyan); text-shadow: 0 0 16px var(--cyan); }
+.rsb-value.v-err { color: var(--red); text-shadow: 0 0 16px var(--red); }
+
+.rsb-unit {
+  font-family: var(--font-terminal);
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* New record banner */
+.new-record-banner {
+  background: linear-gradient(90deg, rgba(255,215,0,0.08), rgba(0,255,159,0.08));
+  border: 1px solid var(--yellow);
+  border-radius: 8px;
+  padding: 12px 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--yellow);
+  letter-spacing: 2px;
+  animation: pulse 2s ease infinite;
+  display: none;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(255,215,0,0.2); }
+  50% { box-shadow: 0 0 25px rgba(255,215,0,0.4); }
+}
+
+/* Name entry */
+.name-entry-section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.name-entry-label {
+  font-family: var(--font-terminal);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.name-input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.name-input {
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: var(--font-terminal);
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.name-input:focus { border-color: var(--green); }
+
+.save-btn {
+  padding: 10px 20px;
+  background: var(--green);
+  border: none;
+  border-radius: 6px;
+  color: var(--bg);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.save-btn:hover { background: var(--green-dim); box-shadow: 0 0 16px var(--green); }
+
+/* Result action buttons */
+.result-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ra-btn {
+  padding: 14px;
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid;
+}
+
+.ra-btn.primary {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--bg);
+}
+
+.ra-btn.primary:hover { box-shadow: 0 0 20px var(--green); }
+
+.ra-btn.secondary {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-dim);
+}
+
+.ra-btn.secondary:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* ==================== LEARN SCREEN ==================== */
+.learn-header {
+  margin-bottom: 32px;
+}
+
+.learn-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.learn-subtitle {
+  font-family: var(--font-terminal);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.learn-level-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.ltab {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-family: var(--font-terminal);
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.ltab.active.basic { border-color: var(--green); color: var(--green); background: rgba(0,255,159,0.06); }
+.ltab.active.intermediate { border-color: var(--cyan); color: var(--cyan); background: rgba(0,212,255,0.06); }
+.ltab.active.advanced { border-color: var(--orange); color: var(--orange); background: rgba(255,107,53,0.06); }
+
+.cmd-reference-table {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.cmd-ref-header {
+  display: grid;
+  grid-template-columns: 2fr 3fr 80px;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-terminal);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.cmd-ref-row {
+  display: grid;
+  grid-template-columns: 2fr 3fr 80px;
+  gap: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  align-items: start;
+  transition: background 0.15s;
+}
+
+.cmd-ref-row:last-child { border-bottom: none; }
+.cmd-ref-row:hover { background: rgba(0,255,159,0.03); }
+
+.cmd-ref-cmd {
+  font-family: var(--font-terminal);
+  font-size: 13px;
+  color: var(--green);
+  word-break: break-all;
+}
+
+.cmd-ref-desc {
+  font-family: var(--font-terminal);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.cmd-ref-level {
+  font-family: var(--font-terminal);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.cmd-ref-level.basic { background: rgba(0,255,159,0.08); color: var(--green); }
+.cmd-ref-level.intermediate { background: rgba(0,212,255,0.08); color: var(--cyan); }
+.cmd-ref-level.advanced { background: rgba(255,107,53,0.08); color: var(--orange); }
+
+/* ==================== TIMER MODES ==================== */
+.timer-modes {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+}
+
+.tmode-btn {
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--font-terminal);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tmode-btn.active, .tmode-btn:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* Flicker on error */
+@keyframes errorFlash {
+  0%, 100% { background: var(--panel); }
+  25% { background: rgba(255,56,96,0.08); }
+  75% { background: rgba(255,56,96,0.04); }
+}
+
+.error-flash { animation: errorFlash 0.3s ease; }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .typing-layout { grid-template-columns: 1fr; }
+  .stats-sidebar { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .results-stats-grid { grid-template-columns: 1fr; }
+  #header { padding: 10px 16px; }
+  #main { padding: 16px; }
+}
+</style>
+</head>
 <body>
-<h1>My New DevOps Project</h1>
-<p>Deployed automatically with GitHub Actions</p>
+
+<!-- HEADER -->
+<header id="header">
+  <div class="logo">
+    <div class="logo-icon">$_</div>
+    <div>
+      <div class="logo-text">SHELLTYPE</div>
+      <div class="logo-sub">DevOps Command Trainer</div>
+    </div>
+  </div>
+
+  <div id="top-speed-banner" onclick="openLeaderboard()">
+    <span class="banner-crown">👑</span>
+    <div>
+      <div class="banner-label">FASTEST TYPIST</div>
+      <div style="display:flex;align-items:baseline;gap:6px">
+        <span class="banner-speed" id="banner-wpm">---</span>
+        <span class="banner-wpm-label" style="font-family:var(--font-terminal);font-size:10px;color:var(--text-dim)">WPM</span>
+        <span class="banner-user" id="banner-user">No records yet</span>
+      </div>
+    </div>
+    <span class="banner-arrow">▼ TOP 10</span>
+  </div>
+
+  <nav class="nav-actions">
+    <button class="nav-btn active" onclick="showScreen('menu')">MENU</button>
+    <button class="nav-btn" onclick="showLearnScreen()">LEARN</button>
+  </nav>
+</header>
+
+<!-- LEADERBOARD MODAL -->
+<div id="leaderboard-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">🏆 TOP 10 LEADERBOARD</span>
+      <button class="modal-close" onclick="closeLeaderboard()">✕</button>
+    </div>
+    <div class="leaderboard-list" id="leaderboard-entries">
+      <div style="text-align:center;padding:30px;font-family:var(--font-terminal);color:var(--text-dim)">No scores yet. Be the first!</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main id="main">
+
+  <!-- MENU SCREEN -->
+  <div id="screen-menu" class="screen active">
+    <div class="menu-hero">
+      <h1>MASTER THE<br>COMMAND LINE</h1>
+      <p>TRAIN YOUR FINGERS. MASTER YOUR TOOLS. SHIP FASTER.</p>
+      <div class="menu-hero-prompt">
+        <span style="color:var(--green)">user@shelltype</span><span>:~$</span>
+        <span style="color:var(--yellow)"> select --category &lt;domain&gt; --level &lt;basic|intermediate|advanced&gt;</span>
+      </div>
+    </div>
+
+    <div class="category-grid" id="category-grid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- TYPING SCREEN -->
+  <div id="screen-typing" class="screen">
+    <input type="text" id="typing-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+    <div class="typing-layout">
+      <div>
+        <!-- Terminal -->
+        <div class="terminal-panel" id="terminal-panel" onclick="focusInput()">
+          <div class="terminal-titlebar">
+            <div class="term-dots">
+              <div class="term-dot red"></div>
+              <div class="term-dot yellow"></div>
+              <div class="term-dot green"></div>
+            </div>
+            <div class="term-title" id="term-title">bash — shelltype</div>
+            <div class="term-mode-badge basic" id="term-mode-badge">BASIC</div>
+          </div>
+
+          <div class="timer-modes">
+            <span style="font-family:var(--font-terminal);font-size:11px;color:var(--text-dim);margin-right:4px">MODE:</span>
+            <button class="tmode-btn active" onclick="setTimerMode(30,this)">30s</button>
+            <button class="tmode-btn" onclick="setTimerMode(60,this)">60s</button>
+            <button class="tmode-btn" onclick="setTimerMode(120,this)">120s</button>
+            <button class="tmode-btn" onclick="setTimerMode(0,this)">∞ CMD</button>
+          </div>
+
+          <div class="progress-track">
+            <div class="progress-fill" id="cmd-progress" style="width:0%"></div>
+          </div>
+
+          <div class="cmd-area" id="cmd-area">
+            <div class="cmd-annotation" id="cmd-annotation"></div>
+            <div class="cmd-prompt-line">
+              <span class="cmd-prompt-prefix">
+                <span class="p-user">user</span><span class="p-at">@</span><span class="p-host">devops</span><span class="p-path">:~</span><span class="p-dollar">$</span>
+              </span>
+              <div class="cmd-text-display" id="cmd-text-display"></div>
+            </div>
+          </div>
+
+          <div class="upcoming-section">
+            <div class="upcoming-label">// upcoming commands</div>
+            <div id="upcoming-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Sidebar -->
+      <div class="stats-sidebar">
+        <div class="stat-card">
+          <div class="stat-card-label">WPM</div>
+          <div class="stat-card-value wpm-val" id="live-wpm">0</div>
+          <div class="stat-card-unit">words per minute</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">ACCURACY</div>
+          <div class="stat-card-value acc-val" id="live-acc">100%</div>
+          <div class="stat-card-unit">keystrokes correct</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">TIME</div>
+          <div class="stat-card-value time-val" id="live-time">--</div>
+          <div class="stat-card-unit" id="live-time-unit">seconds</div>
+        </div>
+        <div class="progress-counters">
+          <div class="progress-row">
+            <span class="progress-row-label">Commands</span>
+            <span class="progress-row-val" id="p-cmds">0/0</span>
+          </div>
+          <div class="progress-row">
+            <span class="progress-row-label">Correct</span>
+            <span class="progress-row-val good" id="p-correct">0</span>
+          </div>
+          <div class="progress-row">
+            <span class="progress-row-label">Errors</span>
+            <span class="progress-row-val bad" id="p-errors">0</span>
+          </div>
+          <div class="progress-row">
+            <span class="progress-row-label">Keystrokes</span>
+            <span class="progress-row-val" id="p-keys">0</span>
+          </div>
+        </div>
+        <div class="controls-card">
+          <button class="ctrl-btn" onclick="restartTyping()">↺ Restart <span class="kbd">Tab</span></button>
+          <button class="ctrl-btn" onclick="showScreen('menu')">← Menu <span class="kbd">Esc</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="screen-results" class="screen">
+    <div class="results-layout">
+      <div class="results-header">
+        <div class="results-grade" id="results-grade">A</div>
+        <div class="results-title" id="results-category">LINUX COMMANDS</div>
+      </div>
+
+      <div class="new-record-banner" id="new-record-banner">🏆 NEW PERSONAL BEST!</div>
+
+      <div class="results-stats-grid">
+        <div class="result-stat-box">
+          <div class="rsb-label">WPM</div>
+          <div class="rsb-value v-wpm" id="r-wpm">0</div>
+          <div class="rsb-unit">Words Per Minute</div>
+        </div>
+        <div class="result-stat-box">
+          <div class="rsb-label">ACCURACY</div>
+          <div class="rsb-value v-acc" id="r-acc">0%</div>
+          <div class="rsb-unit">Keystroke Accuracy</div>
+        </div>
+        <div class="result-stat-box">
+          <div class="rsb-label">ERRORS</div>
+          <div class="rsb-value v-err" id="r-errors">0</div>
+          <div class="rsb-unit">Total Mistakes</div>
+        </div>
+      </div>
+
+      <div class="name-entry-section" id="name-entry-section">
+        <div class="name-entry-label">// SAVE YOUR SCORE TO LEADERBOARD</div>
+        <div class="name-input-row">
+          <input type="text" class="name-input" id="player-name-input" placeholder="Enter your username..." maxlength="20">
+          <button class="save-btn" onclick="saveScore()">SAVE</button>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="ra-btn primary" onclick="restartTyping(); showScreen('typing')">↺ RETRY SAME</button>
+        <button class="ra-btn secondary" onclick="showScreen('menu')">← CHANGE CATEGORY</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEARN SCREEN -->
+  <div id="screen-learn" class="screen">
+    <div class="learn-header">
+      <div class="learn-title" id="learn-title">COMMAND REFERENCE</div>
+      <div class="learn-subtitle" id="learn-subtitle">Study the commands before you type them</div>
+    </div>
+
+    <div class="learn-level-tabs">
+      <button class="ltab active basic" onclick="switchLearnLevel('basic',this)">BASIC</button>
+      <button class="ltab intermediate" onclick="switchLearnLevel('intermediate',this)">INTERMEDIATE</button>
+      <button class="ltab advanced" onclick="switchLearnLevel('advanced',this)">ADVANCED</button>
+    </div>
+
+    <div class="cmd-reference-table">
+      <div class="cmd-ref-header">
+        <span>COMMAND</span>
+        <span>DESCRIPTION</span>
+        <span>LEVEL</span>
+      </div>
+      <div id="learn-table-body"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ==================== DATA ====================
+const CATEGORIES = [
+  {
+    id: 'linux',
+    name: 'Linux / Bash',
+    icon: '🐧',
+    desc: 'Shell commands, file ops, process management, permissions & system control',
+    color: '#00ff9f',
+    commands: {
+      basic: [
+        { cmd: 'ls -la', desc: 'List all files including hidden with details' },
+        { cmd: 'cd /home/user', desc: 'Change directory to /home/user' },
+        { cmd: 'pwd', desc: 'Print current working directory' },
+        { cmd: 'mkdir -p projects/app', desc: 'Create nested directories' },
+        { cmd: 'rm -rf old_folder', desc: 'Recursively remove directory and contents' },
+        { cmd: 'cp -r src/ dest/', desc: 'Recursively copy directory' },
+        { cmd: 'mv file.txt /tmp/', desc: 'Move file to /tmp directory' },
+        { cmd: 'cat /etc/passwd', desc: 'Display file contents' },
+        { cmd: 'grep -r "error" /var/log/', desc: 'Recursively search for error in logs' },
+        { cmd: 'find / -name "*.conf" -type f', desc: 'Find all .conf files' },
+        { cmd: 'chmod 755 script.sh', desc: 'Set execute permissions on script' },
+        { cmd: 'chown user:group file', desc: 'Change file owner and group' },
+        { cmd: 'ps aux | grep nginx', desc: 'List processes and filter nginx' },
+        { cmd: 'kill -9 1234', desc: 'Force kill process with PID 1234' },
+        { cmd: 'top', desc: 'Display real-time system processes' },
+        { cmd: 'df -h', desc: 'Show disk usage in human readable format' },
+        { cmd: 'du -sh /var/log', desc: 'Show size of /var/log directory' },
+        { cmd: 'free -m', desc: 'Display memory usage in MB' },
+        { cmd: 'uname -a', desc: 'Show system kernel information' },
+        { cmd: 'whoami', desc: 'Print current user name' },
+        { cmd: 'echo $PATH', desc: 'Print PATH environment variable' },
+        { cmd: 'export VAR=value', desc: 'Set environment variable' },
+        { cmd: 'history | tail -20', desc: 'Show last 20 commands' },
+        { cmd: 'man ls', desc: 'Show manual page for ls command' },
+        { cmd: 'which python3', desc: 'Find path to python3 binary' },
+        { cmd: 'tar -czf backup.tar.gz /data', desc: 'Create compressed tar archive' },
+        { cmd: 'tar -xzf backup.tar.gz', desc: 'Extract compressed tar archive' },
+        { cmd: 'head -n 20 file.log', desc: 'Show first 20 lines of file' },
+        { cmd: 'tail -f /var/log/syslog', desc: 'Follow log file in real time' },
+        { cmd: 'wc -l file.txt', desc: 'Count lines in file' }
+      ],
+      intermediate: [
+        { cmd: 'awk \'{print $1,$3}\' file.txt', desc: 'Print columns 1 and 3 from file' },
+        { cmd: 'sed -i \'s/old/new/g\' file.txt', desc: 'Replace all occurrences in file' },
+        { cmd: 'sort -k2 -n file.txt', desc: 'Sort by 2nd column numerically' },
+        { cmd: 'uniq -c sorted.txt', desc: 'Count duplicate lines' },
+        { cmd: 'xargs -I{} cp {} /backup/', desc: 'Execute cp for each stdin line' },
+        { cmd: 'tee /tmp/output.log', desc: 'Read stdin and write to stdout and file' },
+        { cmd: 'nc -lvp 8080', desc: 'Listen on port 8080 with netcat' },
+        { cmd: 'ss -tulpn', desc: 'Show all listening TCP/UDP ports' },
+        { cmd: 'netstat -rn', desc: 'Show kernel routing table' },
+        { cmd: 'lsof -i :80', desc: 'List processes using port 80' },
+        { cmd: 'strace -p 1234', desc: 'Trace system calls of process 1234' },
+        { cmd: 'curl -X POST -H "Content-Type: application/json" -d @data.json http://api', desc: 'POST JSON to API endpoint' },
+        { cmd: 'jq \'.users[].name\' data.json', desc: 'Extract user names from JSON' },
+        { cmd: 'crontab -e', desc: 'Edit cron jobs for current user' },
+        { cmd: 'systemctl status nginx', desc: 'Check nginx service status' },
+        { cmd: 'journalctl -u nginx --since today', desc: 'View nginx logs from today' },
+        { cmd: 'rsync -avz --progress src/ user@host:/dest/', desc: 'Sync files to remote host' },
+        { cmd: 'ssh-keygen -t ed25519 -C "email@example.com"', desc: 'Generate Ed25519 SSH keypair' },
+        { cmd: 'scp -r /local/dir user@host:/remote/', desc: 'Copy directory to remote host' },
+        { cmd: 'iptables -A INPUT -p tcp --dport 443 -j ACCEPT', desc: 'Allow HTTPS traffic' },
+        { cmd: 'ulimit -n 65536', desc: 'Set max open file descriptors' },
+        { cmd: 'lsblk -f', desc: 'Show block devices with filesystem info' },
+        { cmd: 'mount /dev/sdb1 /mnt/data', desc: 'Mount disk partition' },
+        { cmd: 'fdisk -l /dev/sdb', desc: 'List partition table of disk' },
+        { cmd: 'vmstat 1 5', desc: 'Report virtual memory stats every 1s, 5 times' }
+      ],
+      advanced: [
+        { cmd: 'perf stat -e cycles,instructions ./app', desc: 'Profile CPU cycles and instructions' },
+        { cmd: 'bpftrace -e \'tracepoint:syscalls:sys_enter_open { printf("%s\\n", comm); }\'', desc: 'Trace open syscalls with BPFtrace' },
+        { cmd: 'ip route add 10.0.0.0/8 via 192.168.1.1', desc: 'Add static route to network' },
+        { cmd: 'tc qdisc add dev eth0 root tbf rate 1mbit burst 32kbit latency 400ms', desc: 'Rate limit network interface' },
+        { cmd: 'openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes', desc: 'Generate self-signed SSL certificate' },
+        { cmd: 'strace -c -p $(pgrep nginx) 2>&1 | head -30', desc: 'Summarize syscalls for nginx process' },
+        { cmd: 'cgcreate -g cpu,memory:mygroup && cgexec -g cpu,memory:mygroup ./app', desc: 'Run app in cgroup with resource limits' },
+        { cmd: 'numactl --cpunodebind=0 --membind=0 ./app', desc: 'Bind process to NUMA node 0' },
+        { cmd: 'sar -u 1 10', desc: 'CPU usage report every 1s for 10 intervals' },
+        { cmd: 'iostat -xz 1 5', desc: 'Extended I/O stats every 1s, 5 times' }
+      ]
+    }
+  },
+  {
+    id: 'git',
+    name: 'Git & GitHub',
+    icon: '🔀',
+    desc: 'Version control, branching, merging, rebasing and collaboration workflows',
+    color: '#ff6b35',
+    commands: {
+      basic: [
+        { cmd: 'git init', desc: 'Initialize a new git repository' },
+        { cmd: 'git clone https://github.com/user/repo.git', desc: 'Clone a remote repository' },
+        { cmd: 'git status', desc: 'Show working tree status' },
+        { cmd: 'git add .', desc: 'Stage all changes for commit' },
+        { cmd: 'git commit -m "feat: add login feature"', desc: 'Commit with message' },
+        { cmd: 'git push origin main', desc: 'Push main branch to origin' },
+        { cmd: 'git pull origin main', desc: 'Pull latest changes from main' },
+        { cmd: 'git branch -a', desc: 'List all local and remote branches' },
+        { cmd: 'git checkout -b feature/auth', desc: 'Create and switch to new branch' },
+        { cmd: 'git merge feature/auth', desc: 'Merge feature branch into current' },
+        { cmd: 'git log --oneline -10', desc: 'Show last 10 commits one-line each' },
+        { cmd: 'git diff HEAD~1', desc: 'Show diff from one commit ago' },
+        { cmd: 'git stash push -m "WIP: auth"', desc: 'Stash changes with message' },
+        { cmd: 'git stash pop', desc: 'Apply and remove latest stash' },
+        { cmd: 'git remote -v', desc: 'Show remote URLs' },
+        { cmd: 'git fetch --all --prune', desc: 'Fetch all remotes and prune deleted branches' },
+        { cmd: 'git tag -a v1.0.0 -m "Release v1.0.0"', desc: 'Create annotated tag' },
+        { cmd: 'git show HEAD', desc: 'Show latest commit details' },
+        { cmd: 'git rm --cached file.txt', desc: 'Untrack file but keep locally' },
+        { cmd: 'git config --global user.email "you@example.com"', desc: 'Set global git email' }
+      ],
+      intermediate: [
+        { cmd: 'git rebase -i HEAD~3', desc: 'Interactively rebase last 3 commits' },
+        { cmd: 'git cherry-pick abc1234', desc: 'Apply commit abc1234 to current branch' },
+        { cmd: 'git reset --hard HEAD~1', desc: 'Hard reset to one commit before HEAD' },
+        { cmd: 'git reflog', desc: 'Show history of HEAD movements' },
+        { cmd: 'git bisect start && git bisect bad && git bisect good v1.0', desc: 'Start binary search for bug-introducing commit' },
+        { cmd: 'git submodule add https://github.com/lib/repo libs/repo', desc: 'Add submodule to repository' },
+        { cmd: 'git worktree add ../hotfix hotfix/urgent', desc: 'Create linked working tree for hotfix' },
+        { cmd: 'git log --graph --all --decorate --oneline', desc: 'Show visual branch graph' },
+        { cmd: 'git shortlog -sn --no-merges', desc: 'Count commits per author' },
+        { cmd: 'git blame -L 10,20 src/app.js', desc: 'Show who wrote lines 10-20 of app.js' },
+        { cmd: 'git clean -fdx', desc: 'Remove all untracked files and directories' },
+        { cmd: 'git archive --format=zip HEAD > release.zip', desc: 'Export HEAD as zip file' },
+        { cmd: 'git push --force-with-lease origin feature', desc: 'Force push safely to feature branch' },
+        { cmd: 'git fetch origin && git rebase origin/main', desc: 'Fetch and rebase onto main' },
+        { cmd: 'git commit --amend --no-edit', desc: 'Amend last commit without changing message' }
+      ],
+      advanced: [
+        { cmd: 'git filter-branch --env-filter \'export GIT_AUTHOR_EMAIL="new@email.com"\' --all', desc: 'Rewrite all commits with new email' },
+        { cmd: 'git bundle create repo.bundle --all', desc: 'Bundle all refs into single file' },
+        { cmd: 'git notes add -m "Reviewed by: @alice" HEAD', desc: 'Add note to HEAD commit' },
+        { cmd: 'git for-each-ref --sort=-committerdate refs/heads/ --format \'%(refname:short)\'', desc: 'List branches sorted by last commit' },
+        { cmd: 'git log --follow -p -- path/to/file', desc: 'Show full history of file including renames' },
+        { cmd: 'git rerere', desc: 'Reuse recorded resolution of merge conflicts' },
+        { cmd: 'git replace --graft <commit> <new-parent>', desc: 'Graft commit to different parent' },
+        { cmd: 'git fast-export --all | gzip > repo.dump.gz', desc: 'Fast-export all history compressed' },
+        { cmd: 'git maintenance run --task=gc', desc: 'Run git maintenance garbage collection' },
+        { cmd: 'git verify-commit HEAD', desc: 'Verify GPG signature of HEAD commit' }
+      ]
+    }
+  },
+  {
+    id: 'docker',
+    name: 'Docker & K8s',
+    icon: '🐳',
+    desc: 'Containerization, orchestration, networking and Kubernetes cluster management',
+    color: '#00d4ff',
+    commands: {
+      basic: [
+        { cmd: 'docker ps -a', desc: 'List all containers including stopped' },
+        { cmd: 'docker images', desc: 'List all local images' },
+        { cmd: 'docker pull nginx:alpine', desc: 'Pull nginx alpine image from registry' },
+        { cmd: 'docker run -d -p 80:80 --name web nginx', desc: 'Run nginx container detached on port 80' },
+        { cmd: 'docker exec -it web /bin/sh', desc: 'Open shell in running container' },
+        { cmd: 'docker build -t myapp:latest .', desc: 'Build image from Dockerfile in current dir' },
+        { cmd: 'docker stop web && docker rm web', desc: 'Stop and remove container named web' },
+        { cmd: 'docker logs -f --tail 100 web', desc: 'Follow last 100 lines of container logs' },
+        { cmd: 'docker-compose up -d', desc: 'Start all services in background' },
+        { cmd: 'docker-compose down -v', desc: 'Stop services and remove volumes' },
+        { cmd: 'docker volume create mydata', desc: 'Create named volume' },
+        { cmd: 'docker network create mynet', desc: 'Create custom bridge network' },
+        { cmd: 'docker inspect web', desc: 'Show detailed container info as JSON' },
+        { cmd: 'docker stats --no-stream', desc: 'Show one-time resource usage stats' },
+        { cmd: 'docker system prune -af', desc: 'Remove all unused containers and images' },
+        { cmd: 'kubectl get pods -n production', desc: 'List all pods in production namespace' },
+        { cmd: 'kubectl apply -f deployment.yaml', desc: 'Apply Kubernetes manifest file' },
+        { cmd: 'kubectl get nodes -o wide', desc: 'List cluster nodes with details' },
+        { cmd: 'kubectl describe pod my-pod', desc: 'Show detailed info about a pod' },
+        { cmd: 'kubectl logs -f my-pod -c app', desc: 'Stream logs from app container in pod' }
+      ],
+      intermediate: [
+        { cmd: 'kubectl rollout restart deployment/app', desc: 'Restart all pods in deployment' },
+        { cmd: 'kubectl scale deployment app --replicas=5', desc: 'Scale deployment to 5 replicas' },
+        { cmd: 'kubectl set image deployment/app app=myimage:v2', desc: 'Update deployment image' },
+        { cmd: 'kubectl rollout history deployment/app', desc: 'Show deployment rollout history' },
+        { cmd: 'kubectl rollout undo deployment/app', desc: 'Roll back to previous deployment' },
+        { cmd: 'kubectl port-forward svc/app 8080:80', desc: 'Forward local port to service' },
+        { cmd: 'kubectl exec -it pod/my-pod -- /bin/bash', desc: 'Exec into running pod' },
+        { cmd: 'kubectl top pods --sort-by=cpu', desc: 'Show pod resource usage sorted by CPU' },
+        { cmd: 'kubectl get events --sort-by=.metadata.creationTimestamp', desc: 'Show cluster events by time' },
+        { cmd: 'kubectl create secret generic db-pass --from-literal=password=s3cr3t', desc: 'Create secret from literal value' },
+        { cmd: 'kubectl create configmap app-config --from-file=config.yaml', desc: 'Create ConfigMap from file' },
+        { cmd: 'kubectl drain node1 --ignore-daemonsets', desc: 'Drain node for maintenance' },
+        { cmd: 'kubectl cordon node1', desc: 'Mark node as unschedulable' },
+        { cmd: 'docker buildx build --platform linux/amd64,linux/arm64 -t image:tag --push .', desc: 'Build multi-architecture image' },
+        { cmd: 'kubectl get ingress -A', desc: 'List all ingress objects across namespaces' }
+      ],
+      advanced: [
+        { cmd: 'kubectl debug node/node1 -it --image=busybox', desc: 'Debug node using ephemeral container' },
+        { cmd: 'kubectl patch deploy app -p \'{"spec":{"template":{"spec":{"terminationGracePeriodSeconds":30}}}}\'', desc: 'Patch deployment with JSON merge' },
+        { cmd: 'kubectl auth can-i create pods --as=system:serviceaccount:default:mysa', desc: 'Check permissions for service account' },
+        { cmd: 'docker manifest inspect nginx:latest', desc: 'Inspect multi-arch manifest' },
+        { cmd: 'kubectl get pod my-pod -o jsonpath=\'{.spec.containers[*].name}\'', desc: 'Get container names via JSONPath' },
+        { cmd: 'kubectl apply view-last-applied -f deploy.yaml', desc: 'View last applied configuration' },
+        { cmd: 'kubectl certificate approve user-csr', desc: 'Approve TLS certificate signing request' },
+        { cmd: 'kubectl api-resources --verbs=list -o name | xargs -I{} kubectl get {} -A', desc: 'List all API resources across cluster' },
+        { cmd: 'crictl pods --namespace default', desc: 'List pods using CRI runtime tool' },
+        { cmd: 'etcdctl snapshot save /tmp/etcd-backup.db', desc: 'Backup etcd database snapshot' }
+      ]
+    }
+  },
+  {
+    id: 'aws',
+    name: 'AWS CLI',
+    icon: '☁️',
+    desc: 'Amazon Web Services: EC2, S3, Lambda, ECS, IAM and CloudFormation',
+    color: '#ff9500',
+    commands: {
+      basic: [
+        { cmd: 'aws configure', desc: 'Configure AWS credentials and region' },
+        { cmd: 'aws s3 ls s3://my-bucket/', desc: 'List objects in S3 bucket' },
+        { cmd: 'aws s3 cp file.txt s3://my-bucket/folder/', desc: 'Copy file to S3 bucket' },
+        { cmd: 'aws s3 sync ./dist s3://my-bucket --delete', desc: 'Sync local dir to S3, delete removed files' },
+        { cmd: 'aws ec2 describe-instances --query "Reservations[].Instances[].InstanceId"', desc: 'List all EC2 instance IDs' },
+        { cmd: 'aws ec2 start-instances --instance-ids i-1234567890abcdef0', desc: 'Start EC2 instance' },
+        { cmd: 'aws ec2 stop-instances --instance-ids i-1234567890abcdef0', desc: 'Stop EC2 instance' },
+        { cmd: 'aws lambda invoke --function-name myFunc out.json', desc: 'Invoke Lambda function' },
+        { cmd: 'aws logs tail /aws/lambda/myFunc --follow', desc: 'Stream CloudWatch logs' },
+        { cmd: 'aws iam list-users', desc: 'List all IAM users' },
+        { cmd: 'aws sts get-caller-identity', desc: 'Show current AWS account identity' },
+        { cmd: 'aws cloudformation deploy --template-file stack.yaml --stack-name my-stack', desc: 'Deploy CloudFormation stack' },
+        { cmd: 'aws ecr get-login-password | docker login --username AWS --password-stdin <account>.dkr.ecr.<region>.amazonaws.com', desc: 'Login to ECR registry' },
+        { cmd: 'aws eks update-kubeconfig --region us-east-1 --name my-cluster', desc: 'Configure kubectl for EKS cluster' },
+        { cmd: 'aws rds describe-db-instances --query "DBInstances[].DBInstanceIdentifier"', desc: 'List all RDS instance identifiers' },
+        { cmd: 'aws ssm get-parameter --name /app/db/password --with-decryption', desc: 'Get SSM Parameter Store secret' },
+        { cmd: 'aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/123/queue --message-body "hello"', desc: 'Send message to SQS queue' },
+        { cmd: 'aws sns publish --topic-arn arn:aws:sns:us-east-1:123:topic --message "alert"', desc: 'Publish message to SNS topic' },
+        { cmd: 'aws route53 list-hosted-zones', desc: 'List all Route53 hosted zones' },
+        { cmd: 'aws cloudwatch get-metric-statistics --namespace AWS/EC2 --metric-name CPUUtilization', desc: 'Get EC2 CPU metrics' }
+      ],
+      intermediate: [
+        { cmd: 'aws ec2 create-vpc --cidr-block 10.0.0.0/16 --tag-specifications ResourceType=vpc,Tags=[{Key=Name,Value=prod}]', desc: 'Create VPC with CIDR block' },
+        { cmd: 'aws iam create-role --role-name LambdaRole --assume-role-policy-document file://trust.json', desc: 'Create IAM role with trust policy' },
+        { cmd: 'aws lambda update-function-code --function-name myFunc --zip-file fileb://function.zip', desc: 'Update Lambda function code' },
+        { cmd: 'aws cloudformation describe-stack-events --stack-name my-stack', desc: 'View CloudFormation stack events' },
+        { cmd: 'aws s3api put-bucket-policy --bucket my-bucket --policy file://policy.json', desc: 'Apply S3 bucket policy' },
+        { cmd: 'aws secretsmanager get-secret-value --secret-id prod/db/credentials', desc: 'Retrieve secret from Secrets Manager' },
+        { cmd: 'aws ecs run-task --cluster prod --task-definition worker:5 --count 3', desc: 'Run 3 ECS task instances' },
+        { cmd: 'aws autoscaling set-desired-capacity --auto-scaling-group-name asg-prod --desired-capacity 10', desc: 'Set ASG desired capacity' },
+        { cmd: 'aws acm request-certificate --domain-name "*.example.com" --validation-method DNS', desc: 'Request wildcard ACM certificate' },
+        { cmd: 'aws dynamodb scan --table-name Users --filter-expression "active = :val" --expression-attribute-values \'{":val":{"BOOL":true}}\'', desc: 'Scan DynamoDB for active users' }
+      ],
+      advanced: [
+        { cmd: 'aws organizations create-account --email dev@example.com --account-name DevAccount', desc: 'Create new AWS Organizations account' },
+        { cmd: 'aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=DeleteBucket', desc: 'Find DeleteBucket events in CloudTrail' },
+        { cmd: 'aws wafv2 create-web-acl --name prod-waf --scope CLOUDFRONT --region us-east-1 --default-action Allow={} --visibility-config SampledRequestsEnabled=true,CloudWatchMetricsEnabled=true,MetricName=prod', desc: 'Create WAFv2 Web ACL' },
+        { cmd: 'aws service-quotas request-service-quota-increase --service-code ec2 --quota-code L-1216C47A --desired-value 500', desc: 'Request EC2 service quota increase' },
+        { cmd: 'aws codepipeline start-pipeline-execution --name my-pipeline', desc: 'Trigger CodePipeline execution' },
+        { cmd: 'aws glue start-job-run --job-name etl-transform --arguments \'{"--input_path":"s3://raw/","--output_path":"s3://processed/"}\'', desc: 'Start Glue ETL job with arguments' },
+        { cmd: 'aws emr create-cluster --name spark-cluster --use-default-roles --ec2-attributes KeyName=mykey --applications Name=Spark', desc: 'Create EMR Spark cluster' },
+        { cmd: 'aws bedrock invoke-model --model-id anthropic.claude-3-sonnet --body file://request.json output.json', desc: 'Invoke Bedrock Claude model' },
+        { cmd: 'aws network-firewall create-firewall --firewall-name prod-fw --firewall-policy-arn arn:aws:network-firewall::123:firewall-policy/fw-policy --vpc-id vpc-xxx', desc: 'Create Network Firewall' },
+        { cmd: 'aws backup start-backup-job --backup-vault-name prod-vault --resource-arn arn:aws:rds:us-east-1:123:db:mydb --iam-role-arn arn:aws:iam::123:role/backup-role', desc: 'Start on-demand backup job' }
+      ]
+    }
+  },
+  {
+    id: 'terraform',
+    name: 'Terraform / IaC',
+    icon: '🏗️',
+    desc: 'Infrastructure as Code with Terraform, Ansible and cloud provisioning',
+    color: '#7b68ee',
+    commands: {
+      basic: [
+        { cmd: 'terraform init', desc: 'Initialize Terraform working directory' },
+        { cmd: 'terraform plan -out=tfplan', desc: 'Preview changes and save plan' },
+        { cmd: 'terraform apply tfplan', desc: 'Apply saved Terraform plan' },
+        { cmd: 'terraform destroy', desc: 'Destroy all managed infrastructure' },
+        { cmd: 'terraform validate', desc: 'Validate Terraform configuration files' },
+        { cmd: 'terraform fmt -recursive', desc: 'Format all Terraform files recursively' },
+        { cmd: 'terraform state list', desc: 'List all resources in state' },
+        { cmd: 'terraform output', desc: 'Show all output values' },
+        { cmd: 'terraform import aws_instance.web i-1234567890', desc: 'Import existing EC2 into state' },
+        { cmd: 'terraform workspace new staging', desc: 'Create new staging workspace' },
+        { cmd: 'terraform workspace select production', desc: 'Switch to production workspace' },
+        { cmd: 'terraform taint aws_instance.web', desc: 'Mark resource for recreation' },
+        { cmd: 'terraform graph | dot -Tsvg > graph.svg', desc: 'Generate dependency graph as SVG' },
+        { cmd: 'terraform show tfplan', desc: 'Human-readable output of plan' },
+        { cmd: 'terraform providers lock -platform=linux_amd64', desc: 'Lock provider for Linux AMD64' },
+        { cmd: 'ansible-playbook -i inventory/prod playbook.yml --tags deploy', desc: 'Run Ansible playbook with deploy tag' },
+        { cmd: 'ansible all -i inventory -m ping', desc: 'Ping all hosts in inventory' },
+        { cmd: 'ansible-vault encrypt secrets.yml', desc: 'Encrypt secrets file with Ansible Vault' },
+        { cmd: 'ansible-galaxy install geerlingguy.docker', desc: 'Install Ansible Galaxy role' },
+        { cmd: 'packer build template.pkr.hcl', desc: 'Build machine image from Packer template' }
+      ],
+      intermediate: [
+        { cmd: 'terraform state mv aws_instance.old aws_instance.new', desc: 'Rename resource in state' },
+        { cmd: 'terraform state rm aws_instance.web', desc: 'Remove resource from state without destroying' },
+        { cmd: 'terraform force-unlock 1234abcd', desc: 'Force release state lock' },
+        { cmd: 'terraform apply -target=module.vpc', desc: 'Apply only VPC module changes' },
+        { cmd: 'terraform apply -var="env=production" -var-file="prod.tfvars"', desc: 'Apply with variable overrides' },
+        { cmd: 'terraform console', desc: 'Interactive Terraform expression console' },
+        { cmd: 'terragrunt run-all plan', desc: 'Plan all Terragrunt modules' },
+        { cmd: 'ansible-playbook site.yml -e "version=2.1.0" --limit web_servers', desc: 'Run playbook on web_servers with version var' },
+        { cmd: 'ansible -i inventory all -m setup --tree /tmp/facts/', desc: 'Gather and save all host facts' },
+        { cmd: 'helm install myapp ./chart -f values-prod.yaml -n production', desc: 'Install Helm chart with prod values' }
+      ],
+      advanced: [
+        { cmd: 'terraform apply -replace="aws_instance.web"', desc: 'Force replace specific resource' },
+        { cmd: 'terraform providers schema -json | jq \'.provider_schemas\'', desc: 'Inspect provider schemas as JSON' },
+        { cmd: 'TF_LOG=DEBUG terraform apply 2>&1 | tee terraform-debug.log', desc: 'Apply with debug logging to file' },
+        { cmd: 'terraform test -filter=tests/unit/', desc: 'Run Terraform unit tests' },
+        { cmd: 'infracost breakdown --path . --format json --out-file infracost.json', desc: 'Calculate cloud cost estimate' },
+        { cmd: 'checkov -d . --framework terraform --output json', desc: 'Security scan Terraform code' },
+        { cmd: 'tflint --recursive --format=compact', desc: 'Lint all Terraform files recursively' },
+        { cmd: 'atlantis plan -d terraform/ -w production', desc: 'Run Atlantis plan in production workspace' },
+        { cmd: 'ansible-playbook site.yml --step --start-at-task="Deploy App"', desc: 'Step-by-step from specific task' },
+        { cmd: 'pulumi stack export | pulumi stack import', desc: 'Export and re-import Pulumi stack state' }
+      ]
+    }
+  },
+  {
+    id: 'cicd',
+    name: 'CI/CD & DevOps',
+    icon: '🚀',
+    desc: 'GitHub Actions, Jenkins, ArgoCD, monitoring and deployment pipelines',
+    color: '#ff3860',
+    commands: {
+      basic: [
+        { cmd: 'gh workflow run deploy.yml -f env=production', desc: 'Trigger GitHub Actions workflow' },
+        { cmd: 'gh pr create --title "Fix auth bug" --body "Closes #123" --base main', desc: 'Create pull request targeting main' },
+        { cmd: 'gh run watch', desc: 'Watch latest GitHub Actions run' },
+        { cmd: 'gh secret set API_KEY --body "abc123" --env production', desc: 'Set environment secret in GitHub' },
+        { cmd: 'argocd app sync myapp --prune', desc: 'Sync ArgoCD app and prune removed resources' },
+        { cmd: 'argocd app status myapp', desc: 'Show ArgoCD app health and sync status' },
+        { cmd: 'flux reconcile kustomization apps --with-source', desc: 'Flux reconcile app kustomization' },
+        { cmd: 'helm upgrade --install app ./chart --atomic --timeout 5m', desc: 'Helm upgrade with rollback on failure' },
+        { cmd: 'kubectl apply -k overlays/production/', desc: 'Apply Kustomize production overlay' },
+        { cmd: 'act push --job build', desc: 'Run GitHub Actions locally with act' },
+        { cmd: 'docker tag myapp:latest registry.io/myapp:v1.2.3', desc: 'Tag image for versioned push' },
+        { cmd: 'docker push registry.io/myapp:v1.2.3', desc: 'Push versioned image to registry' },
+        { cmd: 'skaffold dev', desc: 'Build and deploy with hot reload for development' },
+        { cmd: 'flux check', desc: 'Check Flux system components health' },
+        { cmd: 'trivy image nginx:latest --severity HIGH,CRITICAL', desc: 'Scan image for critical vulnerabilities' },
+        { cmd: 'snyk container test nginx:latest', desc: 'Snyk security test on container image' },
+        { cmd: 'sonar-scanner -Dsonar.projectKey=myapp', desc: 'Run SonarQube code quality scan' },
+        { cmd: 'semgrep --config=auto src/', desc: 'Run Semgrep SAST security scan on source' },
+        { cmd: 'grype sbom.json --output json > vuln-report.json', desc: 'Scan SBOM for vulnerabilities' },
+        { cmd: 'syft packages dir:/app -o spdx-json > sbom.json', desc: 'Generate SBOM from application directory' }
+      ],
+      intermediate: [
+        { cmd: 'argocd app set myapp --sync-policy automated --self-heal', desc: 'Enable auto-sync and self-healing' },
+        { cmd: 'flux create source git myapp --url=https://github.com/org/repo --branch=main', desc: 'Create Flux Git source' },
+        { cmd: 'gh api /repos/org/repo/deployments --method POST -F ref=main -F environment=production', desc: 'Create GitHub deployment via API' },
+        { cmd: 'kubectl argo rollouts get rollout myapp --watch', desc: 'Watch Argo Rollouts deployment progress' },
+        { cmd: 'kubectl argo rollouts promote myapp', desc: 'Promote canary rollout to next step' },
+        { cmd: 'helm dependency update ./chart', desc: 'Update Helm chart dependencies' },
+        { cmd: 'kustomize build overlays/prod | kubectl apply -f -', desc: 'Build and apply Kustomize overlay' },
+        { cmd: 'jenkins-jobs update --recursive jobs/', desc: 'Update all Jenkins jobs from DSL' },
+        { cmd: 'tekton pipeline start build-and-deploy -p IMAGE=registry.io/app:latest', desc: 'Start Tekton pipeline with image param' },
+        { cmd: 'crossplane render xr.yaml composition.yaml functions.yaml', desc: 'Render Crossplane composite resource' }
+      ],
+      advanced: [
+        { cmd: 'spinnaker pipeline save --application myapp --file pipeline.json', desc: 'Save Spinnaker pipeline from JSON' },
+        { cmd: 'dagger run go run ci/main.go', desc: 'Run Dagger CI pipeline locally' },
+        { cmd: 'earthly +integration-tests --push', desc: 'Run Earthly integration tests and push' },
+        { cmd: 'ko build ./cmd/app --platform=all --tags latest,$(git rev-parse --short HEAD)', desc: 'Build and push Go container image with ko' },
+        { cmd: 'goreleaser release --rm-dist', desc: 'Release Go binaries to all targets' },
+        { cmd: 'melange build package.yaml --arch amd64,arm64', desc: 'Build APK packages with melange' },
+        { cmd: 'apko publish apko.yaml registry.io/app:latest', desc: 'Build distroless image with apko' },
+        { cmd: 'flux push artifact oci://registry.io/repo/app:latest --path ./manifests', desc: 'Push OCI artifact to registry via Flux' },
+        { cmd: 'oci-copy --insecure source.registry.io/app:v1 dest.registry.io/app:v1', desc: 'Copy OCI image between registries' },
+        { cmd: 'cosign sign --key cosign.key registry.io/app@sha256:abc123', desc: 'Sign container image with Cosign' }
+      ]
+    }
+  }
+];
+
+// ==================== STATE ====================
+let state = {
+  currentCategory: null,
+  currentLevel: 'basic',
+  commands: [],
+  cmdIndex: 0,
+  typed: '',
+  errors: 0,
+  totalKeys: 0,
+  correctKeys: 0,
+  startTime: null,
+  timerInterval: null,
+  wpmInterval: null,
+  timerMode: 30, // 0 = command count mode
+  timeLeft: 30,
+  isRunning: false,
+  isFinished: false,
+  learnCategory: null,
+  learnLevel: 'basic'
+};
+
+// ==================== LEADERBOARD ====================
+function getLeaderboard() {
+  try { return JSON.parse(localStorage.getItem('shelltype_lb') || '[]'); }
+  catch { return []; }
+}
+
+function saveLeaderboard(lb) {
+  localStorage.setItem('shelltype_lb', JSON.stringify(lb));
+}
+
+function addScore(name, wpm, acc, category, level) {
+  const lb = getLeaderboard();
+  lb.push({ name, wpm, acc, category, level, date: new Date().toISOString() });
+  lb.sort((a, b) => b.wpm - a.wpm);
+  saveLeaderboard(lb);
+  updateBanner();
+}
+
+function updateBanner() {
+  const lb = getLeaderboard();
+  if (!lb.length) return;
+  const top = lb[0];
+  document.getElementById('banner-wpm').textContent = top.wpm;
+  document.getElementById('banner-user').textContent = top.name;
+}
+
+function openLeaderboard() {
+  const lb = getLeaderboard().slice(0, 10);
+  const container = document.getElementById('leaderboard-entries');
+  if (!lb.length) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;font-family:var(--font-terminal);color:var(--text-dim)">No scores yet. Be the first!</div>';
+  } else {
+    const medals = ['r1', 'r2', 'r3'];
+    container.innerHTML = lb.map((e, i) => `
+      <div class="lb-entry" style="animation-delay:${i*0.06}s">
+        <div class="lb-rank ${medals[i] || 'rn'}">${i === 0 ? '👑' : '#' + (i+1)}</div>
+        <div>
+          <div class="lb-name">${e.name}</div>
+          <div class="lb-category">${e.category} · ${e.level}</div>
+        </div>
+        <div>
+          <div class="lb-wpm">${e.wpm}</div>
+          <div class="lb-wpm-label">WPM</div>
+        </div>
+        <div class="lb-acc">${e.acc}%<br><span style="color:var(--text-dim);font-size:10px">ACC</span></div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('leaderboard-modal').classList.add('open');
+}
+
+function closeLeaderboard() {
+  document.getElementById('leaderboard-modal').classList.remove('open');
+}
+
+// Close on backdrop click
+document.getElementById('leaderboard-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeLeaderboard();
+});
+
+// ==================== SCREEN MANAGEMENT ====================
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'menu') { stopTimer(); buildCategoryGrid(); }
+  if (name === 'typing') { setTimeout(() => focusInput(), 100); }
+}
+
+// ==================== MENU ====================
+function buildCategoryGrid() {
+  const grid = document.getElementById('category-grid');
+  grid.innerHTML = CATEGORIES.map(cat => `
+    <div class="cat-card" style="--cat-color:${cat.color}">
+      <div class="cat-header">
+        <span class="cat-icon">${cat.icon}</span>
+        <span class="cat-badge">TOP 100 CMDS</span>
+      </div>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-desc">${cat.desc}</div>
+      <div class="cat-levels">
+        <button class="level-btn basic" onclick="startSession('${cat.id}','basic',event)">BASIC</button>
+        <button class="level-btn intermediate" onclick="startSession('${cat.id}','intermediate',event)">INTER.</button>
+        <button class="level-btn advanced" onclick="startSession('${cat.id}','advanced',event)">ADVANCED</button>
+      </div>
+      <div class="cat-stats">
+        <span class="cat-stat">Basic: <span>${cat.commands.basic.length}</span></span>
+        <span class="cat-stat">Mid: <span>${cat.commands.intermediate.length}</span></span>
+        <span class="cat-stat">Adv: <span>${cat.commands.advanced.length}</span></span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ==================== SESSION START ====================
+function startSession(catId, level, e) {
+  e && e.stopPropagation();
+  const cat = CATEGORIES.find(c => c.id === catId);
+  if (!cat) return;
+
+  state.currentCategory = cat;
+  state.currentLevel = level;
+  state.commands = shuffleArray([...cat.commands[level]]);
+  state.cmdIndex = 0;
+  state.typed = '';
+  state.errors = 0;
+  state.totalKeys = 0;
+  state.correctKeys = 0;
+  state.startTime = null;
+  state.isRunning = false;
+  state.isFinished = false;
+  state.timeLeft = state.timerMode || 30;
+
+  // Update terminal header
+  document.getElementById('term-title').textContent = `${cat.icon} ${cat.name} — ${level.toUpperCase()}`;
+  const badge = document.getElementById('term-mode-badge');
+  badge.textContent = level.toUpperCase();
+  badge.className = `term-mode-badge ${level}`;
+
+  showScreen('typing');
+  resetLiveStats();
+  renderCommand();
+  renderUpcoming();
+  updateCmdProgress();
+}
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ==================== RENDER COMMAND ====================
+function renderCommand() {
+  if (state.cmdIndex >= state.commands.length) {
+    finishSession();
+    return;
+  }
+
+  const cmd = state.commands[state.cmdIndex];
+  state.typed = '';
+
+  // Annotation
+  document.getElementById('cmd-annotation').innerHTML =
+    `<span class="comment-hash">#</span> ${cmd.desc}`;
+
+  // Char spans
+  const display = document.getElementById('cmd-text-display');
+  display.innerHTML = cmd.cmd.split('').map((ch, i) =>
+    `<span class="cmd-char pending" data-i="${i}">${ch === ' ' ? '&nbsp;' : escHtml(ch)}</span>`
+  ).join('');
+
+  // Put cursor on first char
+  const spans = display.querySelectorAll('.cmd-char');
+  if (spans.length > 0) spans[0].classList.add('cursor-pos');
+}
+
+function escHtml(ch) {
+  return ch.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderUpcoming() {
+  const list = document.getElementById('upcoming-list');
+  const upcoming = state.commands.slice(state.cmdIndex + 1, state.cmdIndex + 4);
+  list.innerHTML = upcoming.map((c, i) =>
+    `<div class="upcoming-cmd">${i === 0 ? '→ ' : '  '}${c.cmd}</div>`
+  ).join('');
+}
+
+function updateCmdProgress() {
+  const pct = (state.cmdIndex / state.commands.length) * 100;
+  document.getElementById('cmd-progress').style.width = pct + '%';
+  document.getElementById('p-cmds').textContent = `${state.cmdIndex}/${state.commands.length}`;
+}
+
+// ==================== TYPING ENGINE ====================
+function focusInput() {
+  document.getElementById('typing-input').focus();
+}
+
+document.getElementById('typing-input').addEventListener('input', handleInput);
+document.getElementById('typing-input').addEventListener('keydown', handleKeyDown);
+
+function handleKeyDown(e) {
+  if (e.key === 'Tab') { e.preventDefault(); restartTyping(); return; }
+  if (e.key === 'Escape') { showScreen('menu'); return; }
+}
+
+function handleInput(e) {
+  if (state.isFinished) return;
+  const val = e.target.value;
+  e.target.value = ''; // clear input immediately
+
+  if (!state.isRunning && val.length > 0) {
+    startTimer();
+  }
+
+  if (!state.isRunning) return;
+
+  const cmd = state.commands[state.cmdIndex];
+  if (!cmd) return;
+
+  const lastChar = val[val.length - 1];
+  if (!lastChar) return;
+
+  // Backspace
+  if (e.inputType === 'deleteContentBackward' || lastChar === '\b') {
+    if (state.typed.length > 0) {
+      state.typed = state.typed.slice(0, -1);
+    }
+  } else {
+    const expectedChar = cmd.cmd[state.typed.length];
+    state.totalKeys++;
+
+    if (lastChar === expectedChar) {
+      state.typed += lastChar;
+      state.correctKeys++;
+    } else {
+      state.typed += lastChar;
+      state.errors++;
+      // Flash error
+      document.getElementById('terminal-panel').classList.remove('error-flash');
+      void document.getElementById('terminal-panel').offsetWidth;
+      document.getElementById('terminal-panel').classList.add('error-flash');
+    }
+  }
+
+  updateCharDisplay();
+  document.getElementById('p-errors').textContent = state.errors;
+  document.getElementById('p-keys').textContent = state.totalKeys;
+
+  // Check completion
+  if (state.typed === cmd.cmd) {
+    state.cmdIndex++;
+    document.getElementById('p-correct').textContent = state.cmdIndex;
+    updateCmdProgress();
+
+    if (state.timerMode === 0 && state.cmdIndex >= state.commands.length) {
+      finishSession(); return;
+    }
+
+    renderCommand();
+    renderUpcoming();
+  }
+}
+
+function updateCharDisplay() {
+  const cmd = state.commands[state.cmdIndex];
+  if (!cmd) return;
+  const spans = document.querySelectorAll('#cmd-text-display .cmd-char');
+
+  spans.forEach((span, i) => {
+    span.classList.remove('correct', 'wrong', 'pending', 'cursor-pos');
+    if (i < state.typed.length) {
+      span.classList.add(state.typed[i] === cmd.cmd[i] ? 'correct' : 'wrong');
+    } else {
+      span.classList.add('pending');
+    }
+    if (i === state.typed.length) span.classList.add('cursor-pos');
+  });
+}
+
+// ==================== TIMER ====================
+function setTimerMode(seconds, btn) {
+  state.timerMode = seconds;
+  document.querySelectorAll('.tmode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (!state.isRunning) {
+    state.timeLeft = seconds;
+    document.getElementById('live-time').textContent = seconds || '∞';
+    document.getElementById('live-time-unit').textContent = seconds ? 'seconds' : 'commands';
+  }
+}
+
+function startTimer() {
+  state.isRunning = true;
+  state.startTime = Date.now();
+
+  if (state.timerMode > 0) {
+    state.timeLeft = state.timerMode;
+    state.timerInterval = setInterval(() => {
+      state.timeLeft--;
+      document.getElementById('live-time').textContent = state.timeLeft;
+      if (state.timeLeft <= 0) finishSession();
+    }, 1000);
+  }
+
+  state.wpmInterval = setInterval(updateLiveWPM, 500);
+}
+
+function stopTimer() {
+  clearInterval(state.timerInterval);
+  clearInterval(state.wpmInterval);
+  state.isRunning = false;
+}
+
+function updateLiveWPM() {
+  if (!state.startTime) return;
+  const elapsed = (Date.now() - state.startTime) / 60000;
+  const wpm = elapsed > 0 ? Math.round(state.correctKeys / 5 / elapsed) : 0;
+  const acc = state.totalKeys > 0 ? Math.round((state.correctKeys / state.totalKeys) * 100) : 100;
+  document.getElementById('live-wpm').textContent = wpm;
+  document.getElementById('live-acc').textContent = acc + '%';
+}
+
+function resetLiveStats() {
+  document.getElementById('live-wpm').textContent = '0';
+  document.getElementById('live-acc').textContent = '100%';
+  document.getElementById('live-time').textContent = state.timerMode || '∞';
+  document.getElementById('p-cmds').textContent = '0/0';
+  document.getElementById('p-correct').textContent = '0';
+  document.getElementById('p-errors').textContent = '0';
+  document.getElementById('p-keys').textContent = '0';
+}
+
+function restartTyping() {
+  stopTimer();
+  if (!state.currentCategory) return;
+  startSession(state.currentCategory.id, state.currentLevel, null);
+}
+
+// ==================== FINISH ====================
+function finishSession() {
+  stopTimer();
+  state.isFinished = true;
+
+  const elapsed = state.startTime ? (Date.now() - state.startTime) / 60000 : 1;
+  const wpm = elapsed > 0 ? Math.round(state.correctKeys / 5 / elapsed) : 0;
+  const acc = state.totalKeys > 0 ? Math.round((state.correctKeys / state.totalKeys) * 100) : 100;
+
+  // Grade
+  let grade = 'D';
+  if (wpm >= 80 && acc >= 95) grade = 'S';
+  else if (wpm >= 60 && acc >= 90) grade = 'A';
+  else if (wpm >= 40 && acc >= 85) grade = 'B';
+  else if (wpm >= 25) grade = 'C';
+
+  document.getElementById('results-grade').textContent = grade;
+  document.getElementById('results-grade').className = 'results-grade grade-' + grade;
+  document.getElementById('results-category').textContent =
+    `${state.currentCategory.name} · ${state.currentLevel.toUpperCase()}`;
+  document.getElementById('r-wpm').textContent = wpm;
+  document.getElementById('r-acc').textContent = acc + '%';
+  document.getElementById('r-errors').textContent = state.errors;
+
+  // Check personal best
+  const lb = getLeaderboard();
+  const myBests = lb.filter(e => e.category === state.currentCategory.name && e.level === state.currentLevel);
+  const myBest = myBests.length ? Math.max(...myBests.map(e => e.wpm)) : 0;
+  const newRecord = document.getElementById('new-record-banner');
+  newRecord.style.display = wpm > myBest && wpm > 0 ? 'block' : 'none';
+
+  // Store temp score for saving
+  window._pendingScore = { wpm, acc, category: state.currentCategory.name, level: state.currentLevel };
+
+  showScreen('results');
+}
+
+function saveScore() {
+  const name = document.getElementById('player-name-input').value.trim();
+  if (!name) { document.getElementById('player-name-input').focus(); return; }
+  const s = window._pendingScore;
+  if (s) addScore(name, s.wpm, s.acc, s.category, s.level);
+  document.getElementById('name-entry-section').innerHTML =
+    `<div style="text-align:center;padding:14px;font-family:var(--font-terminal);color:var(--green)">✓ Score saved as "${name}"</div>`;
+}
+
+// ==================== LEARN ====================
+let _learnCatId = null;
+
+function showLearnScreen() {
+  // Default to first category
+  _learnCatId = _learnCatId || 'linux';
+  const cat = CATEGORIES.find(c => c.id === _learnCatId);
+  document.getElementById('learn-title').textContent = (cat.icon + ' ' + cat.name + ' — Command Reference').toUpperCase();
+  document.getElementById('learn-subtitle').textContent = `Master all ${cat.commands.basic.length + cat.commands.intermediate.length + cat.commands.advanced.length} commands before you type them`;
+  renderLearnTable('basic');
+  showScreen('learn');
+}
+
+function switchLearnLevel(level, btn) {
+  document.querySelectorAll('.ltab').forEach(t => t.classList.remove('active', 'basic', 'intermediate', 'advanced'));
+  btn.classList.add('active', level);
+  renderLearnTable(level);
+}
+
+function renderLearnTable(level) {
+  const cat = CATEGORIES.find(c => c.id === (_learnCatId || 'linux'));
+  const body = document.getElementById('learn-table-body');
+  body.innerHTML = cat.commands[level].map(c => `
+    <div class="cmd-ref-row">
+      <div class="cmd-ref-cmd">${c.cmd}</div>
+      <div class="cmd-ref-desc">${c.desc}</div>
+      <div><span class="cmd-ref-level ${level}">${level.substring(0,3).toUpperCase()}</span></div>
+    </div>
+  `).join('');
+}
+
+// ==================== KEYBOARD SHORTCUTS ====================
+document.addEventListener('keydown', function(e) {
+  const activeScreen = document.querySelector('.screen.active');
+  if (!activeScreen) return;
+  if (activeScreen.id === 'screen-typing') {
+    // Focus input on any key press
+    if (!['Escape','Tab'].includes(e.key)) {
+      focusInput();
+    }
+  }
+});
+
+// ==================== INIT ====================
+updateBanner();
+buildCategoryGrid();
+</script>
 </body>
 </html>
