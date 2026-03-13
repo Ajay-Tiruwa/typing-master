@@ -1,4 +1,4 @@
-name: Deploy to EC2
+name: Deploy to S3
 
 on:
   push:
@@ -12,14 +12,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to EC2
+      - name: Deploy to S3
         env:
-          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          HOST:    ${{ secrets.EC2_HOST }}
-          USER:    ${{ secrets.EC2_USER }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ap-northeast-1
         run: |
-          echo "$SSH_KEY" > /tmp/key.pem
-          chmod 600 /tmp/key.pem
-          ssh -i /tmp/key.pem -o StrictHostKeyChecking=no $USER@$HOST "rm -rf /var/www/html/*"
-          scp -i /tmp/key.pem -o StrictHostKeyChecking=no index.html $USER@$HOST:/var/www/html/index.html
-          ssh -i /tmp/key.pem -o StrictHostKeyChecking=no $USER@$HOST "sudo systemctl reload nginx"
+          aws s3 cp index.html s3://ajay-typing-master-2026/index.html

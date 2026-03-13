@@ -6,7 +6,7 @@ ELASTIC_IP=$(aws ec2 describe-addresses \
   --region $REGION \
   --query 'Addresses[0].PublicIp' \
   --output text)
-PEM_KEY=/Users/ajaytiruwa/typing-master/pdevops.pem
+PEM_KEY=~/devops-portfolio/pdevops.pem
 
 # Colors
 RED='\033[0;31m'
@@ -54,10 +54,12 @@ echo "  8) View Nginx live logs"
 echo "  9) Restart Nginx"
 echo " 10) Backup website to Mac"
 echo " 11) Check AWS free tier + open billing"
-echo " 12) ⚠️  STOP EVERYTHING (avoid charges)"
-echo " 13) Exit"
+echo " 12) ⚠️  STOP EVERYTHING (avoid charge)"
+echo " 13) 📋 List all GitHub repos"
+echo " 14) 🗑  Delete a GitHub repo"
+echo " 15) Exit"
 echo ""
-read -p "Choose an option [1-13]: " choice
+read -p "Choose an option [1-15]: " choice
 case $choice in
 
   1)
@@ -299,8 +301,34 @@ case $choice in
       echo -e "${YELLOW}Cancelled. Nothing was stopped.${NC}"
     fi
     ;;
+ 13)
+    echo -e "${CYAN}📋 Your GitHub repositories:${NC}"
+    echo ""
+    gh repo list --limit 20
+    ;;
 
-  13)
+  14)
+    echo ""
+    gh repo list --limit 20
+    echo ""
+    read -p "Type repo name to delete (e.g. Ajay-Tiruwa/typing-master): " REPO_NAME
+
+    if [ -z "$REPO_NAME" ]; then
+      echo -e "${RED}❌ No repo name entered. Cancelled.${NC}"
+    else
+      echo -e "${RED}⚠️  You are about to delete: $REPO_NAME${NC}"
+      echo -e "${RED}⚠️  This cannot be undone!${NC}"
+      read -p "Type YES to confirm: " confirm
+
+      if [ "$confirm" == "YES" ]; then
+        gh repo delete $REPO_NAME --yes
+        echo -e "${GREEN}✅ Repo $REPO_NAME deleted.${NC}"
+      else
+        echo -e "${YELLOW}Cancelled. Nothing was deleted.${NC}"
+      fi
+    fi
+    ;;
+  15)
     echo -e "${GREEN}👋 Goodbye!${NC}"
     exit 0
     ;;

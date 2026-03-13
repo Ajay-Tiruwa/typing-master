@@ -161,7 +161,14 @@ echo -e "${YELLOW}📁 Setting up project folder...${NC}"
 mkdir -p ~/$PROJECT_NAME/.github/workflows
 
 # Create index.html
-cat > ~/$PROJECT_NAME/index.html << 'EOF'
+# Choose index.html
+echo ""
+echo -e "${YELLOW}📄 Do you want to use your own HTML file?${NC}"
+read -p "Paste full path to your HTML file (or press Enter to skip): " HTML_PATH
+
+if [ -z "$HTML_PATH" ]; then
+  echo -e "${YELLOW}Using blank starter page...${NC}"
+  cat > ~/$PROJECT_NAME/index.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html>
 <head><title>New Project</title></head>
@@ -170,36 +177,19 @@ cat > ~/$PROJECT_NAME/index.html << 'EOF'
 <p>Deployed automatically with GitHub Actions</p>
 </body>
 </html>
-EOF
-
-# Create workflow file
-cat > ~/$PROJECT_NAME/.github/workflows/deploy.yml << EOF
-name: Deploy to EC2
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Deploy to EC2
-        env:
-          SSH_KEY: \${{ secrets.EC2_SSH_KEY }}
-          HOST:    \${{ secrets.EC2_HOST }}
-          USER:    \${{ secrets.EC2_USER }}
-        run: |
-          echo "\$SSH_KEY" > /tmp/key.pem
-          chmod 600 /tmp/key.pem
-          ssh -i /tmp/key.pem -o StrictHostKeyChecking=no \$USER@\$HOST "rm -rf /var/www/html/*"
-          scp -i /tmp/key.pem -o StrictHostKeyChecking=no index.html \$USER@\$HOST:/var/www/html/index.html
-          ssh -i /tmp/key.pem -o StrictHostKeyChecking=no \$USER@\$HOST "sudo systemctl reload nginx"
-EOF
+HTMLEOF
+else
+  HTML_PATH="${HTML_PATH/#\~/$HOME}"
+  if [ -f "$HTML_PATH" ]; then
+    cp "$HTML_PATH" ~/$PROJECT_NAME/index.html
+    echo -e "${GREEN}✅ Your file copied as index.html${NC}"
+  else
+    echo -e "${RED}❌ File not found at: $HTML_PATH${NC}"
+    echo -e "${RED}❌ Stopping. Fix the path and try again.${NC}"
+    exit 1
+  fi
+fi
+```
 
 # Copy puri.sh and update it
 cp ~/devops-portfolio/puri.sh ~/$PROJECT_NAME/puri.sh
