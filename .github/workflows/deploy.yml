@@ -1,0 +1,25 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to EC2
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST:    ${{ secrets.EC2_HOST }}
+          USER:    ${{ secrets.EC2_USER }}
+        run: |
+          echo "$SSH_KEY" > /tmp/key.pem
+          chmod 600 /tmp/key.pem
+          ssh -i /tmp/key.pem -o StrictHostKeyChecking=no $USER@$HOST "rm -rf /var/www/html/*"
+          scp -i /tmp/key.pem -o StrictHostKeyChecking=no index.html $USER@$HOST:/var/www/html/index.html
+          ssh -i /tmp/key.pem -o StrictHostKeyChecking=no $USER@$HOST "sudo systemctl reload nginx"
